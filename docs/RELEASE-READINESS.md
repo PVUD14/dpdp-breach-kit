@@ -1,6 +1,7 @@
 # Release readiness — claims and evidence
 
-Every claim made in [README.md](../README.md) and [launch/linkedin-post.md](launch/linkedin-post.md),
+Every claim made in [README.md](../README.md) (technical claims now in
+[DEVELOPERS.md](DEVELOPERS.md); hosting in [decisions/0001-hosting.md](decisions/0001-hosting.md)) and [launch/linkedin-post.md](launch/linkedin-post.md),
 with the evidence for it and who has checked it. Prepared 2026-10-22.
 
 **How to read the Status column**

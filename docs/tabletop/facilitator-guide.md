@@ -56,8 +56,9 @@ and compare it with the scenario's timeline; the scribe keeps the exercise clock
 
 ## Running it with the intake page
 
-1. Build and serve the page (see the README: `npm run build`, then `npm run preview`). It must be
-   served over HTTP; it makes no network requests and stores nothing.
+1. Open the hosted page at <https://pvud14.github.io/dpdp-breach-kit/>, or build and serve your own
+   copy (see [DEVELOPERS.md](../DEVELOPERS.md): `npm run build`, then `npm run preview`). It must be
+   served over HTTP(S); it makes no network requests and stores nothing.
 2. Either start from an empty form, or click **Open a saved file…** and choose the scenario's
    example file from [examples/](examples/). Each example is a snapshot part-way through its
    scenario.

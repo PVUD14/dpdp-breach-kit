@@ -130,11 +130,11 @@ does not allow custom response headers, and a public URL invites real incident d
 the team does not control the hosting of.
 
 **Acceptance criteria.**
-- [ ] A short decision record in `docs/` weighs: convenience; inability to set CSP and
+- [x] A short decision record in `docs/` weighs: convenience; inability to set CSP and
   `frame-ancestors` headers on Pages; clickjacking risk; whether users will treat a hosted copy as
   an official or "safe" place for real data; versioning and cache behaviour.
-- [ ] Decision recorded as one of: no hosting; GitHub Pages with stated limits; another host that
+- [x] Decision recorded as one of: no hosting; GitHub Pages with stated limits; another host that
   can send the CSP as an HTTP header.
-- [ ] If deploying: a pinned-SHA workflow builds `dist/app/`, `npm run check:network` passes
+- [x] If deploying: a pinned-SHA workflow builds `dist/app/`, `npm run check:network` passes
   against the deployed build's files, and the README states the hosting limits.
-- [ ] If not deploying: README says so and keeps the local `npm run preview` instructions.
+- [x] (Not applicable: deploying; see [decisions/0001-hosting.md](decisions/0001-hosting.md).) If not deploying: README says so and keeps the local `npm run preview` instructions.

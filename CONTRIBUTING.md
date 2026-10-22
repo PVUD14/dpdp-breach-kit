@@ -34,12 +34,12 @@ Node.js 22.12 or later.
 
 ```sh
 npm ci
-npm run check       # strict compiler checks (not ESLint; see README); `npm run lint` is an alias
+npm run check       # strict compiler checks (not ESLint; see docs/DEVELOPERS.md); `npm run lint` is an alias
 npm run typecheck
 npm test
 npm run build
 npm run verify:sources  # SHA-256 of docs/source/ against docs/requirements.md
-npm run check:network   # needs a local Chrome/Chromium; see README
+npm run check:network   # needs a local Chrome/Chromium; see docs/DEVELOPERS.md
 ```
 
 ### Windows: drive-letter case

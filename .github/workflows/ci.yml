@@ -33,7 +33,7 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Check (strict compiler checks; see README)
+      - name: Check (strict compiler checks; see docs/DEVELOPERS.md)
         run: npm run check
 
       - name: Typecheck
