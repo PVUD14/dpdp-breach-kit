@@ -11,5 +11,4 @@ open a pull request that adds one line below, in alphabetical order by name.
 
 <!-- one line each: - Full Name (@github-handle) — what you contributed -->
 - KanaManishaReddy (@Manishakana) — Contributor 1
--  (@NavyaSreeMukthapuram) — Contributor 2
 - NavyaSreeMukthapuram (@NavyaSreeMukthapuram) — Contributor 2
