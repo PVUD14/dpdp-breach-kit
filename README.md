@@ -165,7 +165,8 @@ Planned work is in [docs/BACKLOG.md](docs/BACKLOG.md).
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) (one branch per issue, one review, maintainer approval for
 scope and rule-interpretation changes, no real personal data) and [SECURITY.md](SECURITY.md) for
-private vulnerability reporting.
+private vulnerability reporting. Everyone who has contributed is listed in
+[CONTRIBUTORS.md](CONTRIBUTORS.md).
 
 Licensed under the Apache License, Version 2.0: see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 Copyright 2026 PVUDivakar.
