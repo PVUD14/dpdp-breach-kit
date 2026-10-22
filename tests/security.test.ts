@@ -54,8 +54,10 @@ describe("source guards", () => {
   });
 
   it("makes no network, storage, cookie or worker calls anywhere in src", () => {
+    // The SVG namespace is an identifier for createElementNS, never fetched; allow exactly that string.
+    const strip = (t: string) => code(t).replaceAll('"http://www.w3.org/2000/svg"', '""');
     for (const [file, text] of files) {
-      for (const pattern of NETWORK_OR_STORAGE) expect(code(text), `${file} ${pattern}`).not.toMatch(pattern);
+      for (const pattern of NETWORK_OR_STORAGE) expect(strip(text), `${file} ${pattern}`).not.toMatch(pattern);
     }
   });
 
