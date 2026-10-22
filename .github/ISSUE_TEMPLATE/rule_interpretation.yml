@@ -1,0 +1,45 @@
+name: Rule interpretation
+description: Question or proposal about how the Act or Rule 7 text is read or applied.
+labels: [interpretation, needs-maintainer]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Interpretation changes need maintainer approval before any code or docs change.
+        Quote the official text only (docs/source/), not secondary summaries.
+        **Do not include real personal data or real incident details.**
+  - type: input
+    id: provision
+    attributes:
+      label: Provision
+      placeholder: e.g. Rules r. 7(2)(b) / Act s.2(u)
+    validations:
+      required: true
+  - type: input
+    id: ambiguity
+    attributes:
+      label: Related AMB or BR ID (if any)
+      placeholder: e.g. AMB-18, BR-BD-02
+  - type: textarea
+    id: text
+    attributes:
+      label: Official text
+      description: Short quote from the official text, with page reference in docs/source/.
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: What is unclear or wrong
+      description: The readings you see, and what the code or docs do today.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: This issue contains no real personal data.
+          required: true
+        - label: I understand the project is a draft aid, not legal advice.
+          required: true

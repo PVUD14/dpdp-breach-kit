@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "incidentId": "TT-03-INSIDER-EXFILTRATION",
+  "awareness": {
+    "fiduciaryAwareAt": "2027-06-07T10:05:00+05:30",
+    "processorInvolved": false,
+    "processorAwareAt": null,
+    "processorNotifiedFiduciaryAt": null
+  },
+  "classification": {
+    "involvesPersonalData": true,
+    "eventTypes": ["unauthorised_processing"],
+    "compromises": { "confidentiality": true, "integrity": false, "availability": false },
+    "exemptionClaims": [
+      { "clause": "c", "basis": "Synthetic exercise entry: a police complaint about the export is under consideration. Not assessed." }
+    ]
+  },
+  "description": {
+    "nature": "A departing employee exported client files from the client management system to a personal cloud folder.",
+    "extent": "About 3,400 client files.",
+    "occurredAt": "2027-06-03T18:20:00+05:30",
+    "location": "Client management system; export destination outside the company's control.",
+    "likelyImpact": "Client financial and family details held outside the company; at least one client contacted by another firm.",
+    "consequencesForPrincipals": "Unsolicited contact by other firms; possible misuse of financial details.",
+    "eventsCircumstancesReasons": "The export happened after the employee resigned and before access ended. A data-loss alert was raised but not reviewed for four days.",
+    "findingsOnResponsiblePerson": { "status": "findings_recorded", "summary": "An internal user with legitimate access exported the files; deletion could not be confirmed." }
+  },
+  "dataCategories": ["income band", "loan amounts", "family details", "contact details"],
+  "affectedPrincipals": {
+    "estimatedTotal": 3400,
+    "identified": 3400,
+    "reachableViaUserAccount": 0,
+    "reachableViaRegisteredMode": 3400,
+    "noRegisteredChannel": 0,
+    "registeredChannelCompromised": 0
+  },
+  "mitigation": {
+    "implemented": ["Employee access suspended", "Written request to delete the exported files"],
+    "proposed": ["Block uploads to personal cloud storage from managed devices"],
+    "safetyMeasuresForPrincipals": ["Treat unexpected offers that quote your loan or policy details with caution"],
+    "remedialMeasuresAgainstRecurrence": ["Remove bulk-export rights on resignation", "Review data-loss alerts within one working day"]
+  },
+  "queryContactAvailable": true,
+  "noticesSent": [
+    { "kind": "board_initial", "sentAt": "2027-06-08T11:00:00+05:30", "recipientCount": null, "channel": null }
+  ],
+  "extension": { "requestedAt": null, "grantedUntil": null }
+}

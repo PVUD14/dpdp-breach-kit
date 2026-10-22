@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "incidentId": "TT-02-STORAGE-BUCKET",
+  "awareness": {
+    "fiduciaryAwareAt": "2027-03-03T12:15:00+05:30",
+    "processorInvolved": false,
+    "processorAwareAt": null,
+    "processorNotifiedFiduciaryAt": null
+  },
+  "classification": {
+    "involvesPersonalData": true,
+    "eventTypes": ["accidental_disclosure"],
+    "compromises": { "confidentiality": true, "integrity": false, "availability": false },
+    "exemptionClaims": []
+  },
+  "description": {
+    "nature": "An analytics storage bucket holding nightly order exports was publicly listable after an access-policy change during a migration.",
+    "extent": "9 export files downloaded from outside addresses: about 46,000 order rows relating to about 27,800 customers. Exposure lasted about 19 days.",
+    "occurredAt": "2027-02-12T02:00:00+05:30",
+    "location": "Cloud storage bucket used for order analytics (fictional Plumvale Online Store).",
+    "likelyImpact": "Exposure of delivery addresses, phone numbers and items ordered.",
+    "consequencesForPrincipals": "Possible unsolicited contact or fraud attempts using order details.",
+    "eventsCircumstancesReasons": "Access policy on the bucket was changed in error during a storage migration; no alert covered public access.",
+    "findingsOnResponsiblePerson": { "status": null, "summary": null }
+  },
+  "dataCategories": ["delivery address", "phone number", "order contents"],
+  "affectedPrincipals": {
+    "estimatedTotal": 27800,
+    "identified": 27800,
+    "reachableViaUserAccount": 25900,
+    "reachableViaRegisteredMode": 1900,
+    "noRegisteredChannel": 0,
+    "registeredChannelCompromised": null
+  },
+  "mitigation": {
+    "implemented": ["Bucket made private", "Public-access block applied at account level"],
+    "proposed": [],
+    "safetyMeasuresForPrincipals": ["Be cautious of calls or messages that quote an order", "Plumvale will never ask for a one-time password"],
+    "remedialMeasuresAgainstRecurrence": null
+  },
+  "queryContactAvailable": true,
+  "noticesSent": [],
+  "extension": { "requestedAt": null, "grantedUntil": null }
+}

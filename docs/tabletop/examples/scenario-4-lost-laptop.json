@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "incidentId": "TT-04-LOST-LAPTOP",
+  "awareness": {
+    "fiduciaryAwareAt": "2027-08-18T19:30:00+05:30",
+    "processorInvolved": false,
+    "processorAwareAt": null,
+    "processorNotifiedFiduciaryAt": null
+  },
+  "classification": {
+    "involvesPersonalData": true,
+    "eventTypes": ["accidental_loss_of_access"],
+    "compromises": { "confidentiality": null, "integrity": false, "availability": false },
+    "exemptionClaims": []
+  },
+  "description": {
+    "nature": "A school laptop without disk encryption, holding a spreadsheet of student records, was lost in public transport.",
+    "extent": "One spreadsheet covering 412 students in classes 6 to 10. Whether the file was opened is not known.",
+    "occurredAt": "2027-08-18T18:30:00+05:30",
+    "location": "Lost in transit; device not recovered.",
+    "likelyImpact": null,
+    "consequencesForPrincipals": null,
+    "eventsCircumstancesReasons": null,
+    "findingsOnResponsiblePerson": { "status": null, "summary": null }
+  },
+  "dataCategories": ["student name", "class", "marks", "parent phone number"],
+  "affectedPrincipals": {
+    "estimatedTotal": 412,
+    "identified": 412,
+    "reachableViaUserAccount": 0,
+    "reachableViaRegisteredMode": 398,
+    "noRegisteredChannel": 14,
+    "registeredChannelCompromised": 0
+  },
+  "mitigation": {
+    "implemented": ["Teacher's account passwords reset"],
+    "proposed": null,
+    "safetyMeasuresForPrincipals": null,
+    "remedialMeasuresAgainstRecurrence": null
+  },
+  "queryContactAvailable": null,
+  "noticesSent": [],
+  "extension": { "requestedAt": null, "grantedUntil": null }
+}

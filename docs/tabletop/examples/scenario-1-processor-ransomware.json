@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "incidentId": "TT-01-PROCESSOR-RANSOMWARE",
+  "awareness": {
+    "fiduciaryAwareAt": "2027-01-15T08:40:00+05:30",
+    "processorInvolved": true,
+    "processorAwareAt": "2027-01-14T22:40:00+05:30",
+    "processorNotifiedFiduciaryAt": "2027-01-15T08:40:00+05:30"
+  },
+  "classification": {
+    "involvesPersonalData": true,
+    "eventTypes": ["unauthorised_processing", "accidental_loss_of_access"],
+    "compromises": { "confidentiality": true, "integrity": null, "availability": true },
+    "exemptionClaims": []
+  },
+  "description": {
+    "nature": "Ransomware encrypted the appointment-booking database host operated by the Data Processor; an export of appointment records was copied out before encryption.",
+    "extent": "About 38,000 appointment records relating to about 31,500 patients across 12 clinics.",
+    "occurredAt": "2027-01-14T22:40:00+05:30",
+    "location": "Data Processor's hosted booking environment (fictional Brightquay Cloud Services).",
+    "likelyImpact": "Exposure of appointment details including reason for visit; booking outage for about 14 hours.",
+    "consequencesForPrincipals": null,
+    "eventsCircumstancesReasons": null,
+    "findingsOnResponsiblePerson": { "status": "none_yet", "summary": null }
+  },
+  "dataCategories": ["appointment details", "contact details", "reason for visit (free text)"],
+  "affectedPrincipals": {
+    "estimatedTotal": 31500,
+    "identified": 31500,
+    "reachableViaUserAccount": 0,
+    "reachableViaRegisteredMode": 29400,
+    "noRegisteredChannel": 2100,
+    "registeredChannelCompromised": null
+  },
+  "mitigation": {
+    "implemented": ["Affected host isolated by the Data Processor", "Booking service restored from backup"],
+    "proposed": ["Rotate all credentials used by the booking integration"],
+    "safetyMeasuresForPrincipals": null,
+    "remedialMeasuresAgainstRecurrence": null
+  },
+  "queryContactAvailable": true,
+  "noticesSent": [],
+  "extension": { "requestedAt": null, "grantedUntil": null }
+}

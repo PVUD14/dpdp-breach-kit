@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Check, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Check (strict compiler checks; see README)
+        run: npm run check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+      - name: Verify source hashes (skips when the PDFs are absent)
+        # The source PDFs are not committed and are never downloaded in CI. Exit 2 means
+        # "sources not downloaded" and is treated as a clean skip; 1 (mismatch) and 3 fail.
+        shell: bash
+        run: |
+          set +e
+          node scripts/verify-sources.mjs
+          code=$?
+          set -e
+          if [ "$code" -eq 2 ]; then
+            echo "::notice title=Source hashes::Source PDFs are not in the checkout; hash check skipped."
+            exit 0
+          fi
+          exit "$code"
+
+  network-check:
+    name: Intake page network check (headless Chrome)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Untested on Linux so far. Remove `continue-on-error` after the first green run so that a
+    # failure (an outside request, CSP violation, storage use) blocks the build.
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Network check
+        # Uses the Chrome preinstalled on the runner. The Chrome sandbox can be unavailable on
+        # Ubuntu runners (user-namespace restrictions), hence CHROME_NO_SANDBOX.
+        env:
+          CHROME_NO_SANDBOX: "1"
+        run: npm run check:network
+
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: TruffleHog
+        uses: trufflesecurity/trufflehog@e63326d6545de8f425d93ce24078c6e68d83f70e # v3.99.3
+        with:
+          # Pin the scanner image to the same release as the action (the default is "latest").
+          version: "3.99.3"
+          extra_args: --results=verified,unknown

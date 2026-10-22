@@ -1,0 +1,29 @@
+{
+  "name": "dpdp-breach-kit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Draft aid for personal data breach intimation under Rule 7 of the DPDP Rules, 2025. Not legal advice. See docs/requirements.md.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/dpdp-breach-core.js",
+  "types": "./src/index.ts",
+  "scripts": {
+    "check": "tsc -p tsconfig.lint.json",
+    "lint": "npm run check",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node scripts/run-vitest.mjs run",
+    "build": "vite build && vite build --mode app",
+    "dev": "vite --mode app",
+    "preview": "vite preview --mode app",
+    "check:network": "vite build --mode app && node scripts/check-network.mjs",
+    "verify:sources": "node scripts/verify-sources.mjs"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

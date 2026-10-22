@@ -1,0 +1,30 @@
+name: Change request
+description: Propose a feature or a change in scope.
+labels: [enhancement, needs-maintainer]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Scope changes (new dependencies, network access, storage, new data collected) need
+        maintainer approval before work starts. **Do not include real personal data.**
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What you need and why.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What would change, and which BR-* requirements or AMB-* items it touches.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: This request contains no real personal data.
+          required: true

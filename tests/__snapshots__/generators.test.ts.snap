@@ -1,0 +1,155 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`complete incident > matches the reviewed snapshot > board detailed 1`] = `
+"DRAFT AID — NOT LEGAL ADVICE
+
+Intimation of personal data breach to the Data Protection Board — detailed report (r. 7(2)(b))
+Incident reference: INC-TEST-0001
+Data Fiduciary became aware (as recorded): 20 Oct 2026, 09:00:00 IST
+Due: within seventy-two hours of becoming aware, or such longer period as the Board allows on a written request (r. 7(2)(b)).
+The deadline is not computed in this draft: use computeBoardReportDeadline with an explicit awareness basis (AMB-01).
+Submission channel: none prescribed (AMB-08).
+Breach checklist (Act s.2(u), s.17(1)): definition = meets_definition; intimation = required.
+
+1. Updated and detailed description [BR-BD-02 · r. 7(2)(b)(i)]
+   Nature: Misconfigured storage bucket exposed export files
+   Extent: One export batch
+   Timing of occurrence: 19 Oct 2026, 22:15:00 IST
+   Location of occurrence: Synthetic test environment
+   Likely impact: Exposure of contact fields
+
+2. Events, circumstances and reasons leading to the breach [BR-BD-03 · r. 7(2)(b)(ii)]
+   Broad facts: Access policy changed during migration
+
+3. Measures implemented or proposed to mitigate risk [BR-BD-04 · r. 7(2)(b)(iii)]
+   Implemented:
+     - Bucket access revoked
+   Proposed: None recorded.
+
+4. Findings regarding the person who caused the breach [BR-BD-05 · r. 7(2)(b)(iv)]
+   Findings: Internal configuration error
+
+5. Remedial measures to prevent recurrence [BR-BD-06 · r. 7(2)(b)(v)]
+   Remedial measures taken:
+     - Policy-as-code check on storage ACLs
+
+6. Report on intimations given to affected Data Principals [BR-BD-07 · r. 7(2)(b)(vi)]
+   Intimations given: 1 intimation batch(es), first 20 Oct 2026, 12:00:00 IST, last 20 Oct 2026, 12:00:00 IST; channels: user_account
+   Data Principals reached: 100
+   Affected Data Principals identified: 100
+
+7. Extension of time [BR-BD-08 · r. 7(2)(b)]
+   Written request for a longer period: None recorded.
+   Longer period allowed by the Board until: None recorded.
+
+AMBIGUITIES THAT APPLY (docs/requirements.md §5)
+- AMB-01: "On becoming aware" is not defined; the 72-hour clock and "without delay" both run from it.
+- AMB-05: No risk, harm or severity threshold is stated; on the text any personal data breach triggers intimation.
+    Applied here: No risk, harm or severity threshold is applied: any breach that meets the definition is reported as requiring intimation.
+- AMB-08: No form, template, channel, address or portal is prescribed for intimation to the Board.
+- AMB-09: No obligation to send updates after the 72-hour detailed report is stated.
+    Applied here: Only the single detailed report under r. 7(2)(b) is checked; no later updates are expected or tracked.
+- AMB-10: The 72-hour report must cover Data Principal intimations, but r. 7(1) says only "without delay".
+- AMB-12: The extension request has no stated deadline, grounds, format, channel or response time; the position while pending is not stated.
+- AMB-18: It is not stated whether a report at exactly 72:00:00 is "within seventy-two hours", or the unit of precision.
+
+HUMAN REVIEW CHECKLIST — PLAIN LANGUAGE (BR-DP-03: "concise, clear and plain manner")
+[ ] Concise: each section says only what the reader needs; no repetition.
+[ ] Clear: no unexplained legal, technical or internal terms (incident IDs, system names, acronyms).
+[ ] Plain: short sentences, active voice, a stated subject for every action.
+[ ] Factual: every statement comes from the incident record; nothing added or speculated.
+[ ] Every [NOT PROVIDED] placeholder is resolved, or deliberately left with a recorded reason.
+[ ] The "DRAFT AID — NOT LEGAL ADVICE" header, requirement IDs, rule citations and this checklist are removed before sending.
+[ ] "Updated and detailed" (BR-BD-02) adds to the initial intimation rather than repeating it.
+[ ] Report on intimations (BR-BD-07) matches the notices actually sent.
+"
+`;
+
+exports[`complete incident > matches the reviewed snapshot > board initial 1`] = `
+"DRAFT AID — NOT LEGAL ADVICE
+
+Intimation of personal data breach to the Data Protection Board — initial (r. 7(2)(a))
+Incident reference: INC-TEST-0001
+Data Fiduciary became aware (as recorded): 20 Oct 2026, 09:00:00 IST
+Due: "without delay" after becoming aware (r. 7(2)(a)).
+Submission channel: none prescribed (AMB-08).
+Breach checklist (Act s.2(u), s.17(1)): definition = meets_definition; intimation = required.
+
+1. Description of the breach [BR-BD-01 · r. 7(2)(a)]
+   Nature: Misconfigured storage bucket exposed export files
+   Extent: One export batch
+   Timing of occurrence: 19 Oct 2026, 22:15:00 IST
+   Location of occurrence: Synthetic test environment
+   Likely impact: Exposure of contact fields
+
+AMBIGUITIES THAT APPLY (docs/requirements.md §5)
+- AMB-01: "On becoming aware" is not defined; the 72-hour clock and "without delay" both run from it.
+- AMB-02: "Without delay" has no stated maximum for Data Principal intimation or the initial Board intimation.
+- AMB-05: No risk, harm or severity threshold is stated; on the text any personal data breach triggers intimation.
+    Applied here: No risk, harm or severity threshold is applied: any breach that meets the definition is reported as requiring intimation.
+- AMB-07: "Location of occurrence" may mean a geographic place, a system or environment, or an entity.
+    Applied here: description.location is checked for presence only; which sense of "location" it records is not checked.
+- AMB-08: No form, template, channel, address or portal is prescribed for intimation to the Board.
+
+HUMAN REVIEW CHECKLIST — PLAIN LANGUAGE (BR-DP-03: "concise, clear and plain manner")
+[ ] Concise: each section says only what the reader needs; no repetition.
+[ ] Clear: no unexplained legal, technical or internal terms (incident IDs, system names, acronyms).
+[ ] Plain: short sentences, active voice, a stated subject for every action.
+[ ] Factual: every statement comes from the incident record; nothing added or speculated.
+[ ] Every [NOT PROVIDED] placeholder is resolved, or deliberately left with a recorded reason.
+[ ] The "DRAFT AID — NOT LEGAL ADVICE" header, requirement IDs, rule citations and this checklist are removed before sending.
+[ ] Location of occurrence states which sense is meant: place, system or entity (AMB-07).
+"
+`;
+
+exports[`complete incident > matches the reviewed snapshot > data principal notice 1`] = `
+"DRAFT AID — NOT LEGAL ADVICE
+
+Intimation of personal data breach to affected Data Principals (r. 7(1))
+Incident reference: INC-TEST-0001
+Send: "without delay" after becoming aware (r. 7(1), BR-DP-01), to each affected Data Principal.
+Channel: the recipient's user account or a mode of communication registered with the Data Fiduciary (BR-DP-04).
+Breach checklist (Act s.2(u), s.17(1)): definition = meets_definition; intimation = required.
+
+1. Description of the breach [BR-DP-05 · r. 7(1)(a)]
+   Nature: Misconfigured storage bucket exposed export files
+   Extent: One export batch
+   Timing of occurrence: 19 Oct 2026, 22:15:00 IST
+
+2. Consequences likely to arise for you [BR-DP-06 · r. 7(1)(b)]
+   Likely consequences: Possible unsolicited contact
+
+3. Measures to mitigate risk [BR-DP-07 · r. 7(1)(c)]
+   Measures implemented:
+     - Bucket access revoked
+   Measures being implemented: None recorded.
+
+4. Safety measures you may take [BR-DP-08 · r. 7(1)(d)]
+   Safety measures:
+     - Be alert to unexpected messages
+
+5. Who can answer your questions [BR-DP-09 · r. 7(1)(e)]
+   Business contact: [INSERT BUSINESS CONTACT INFORMATION — recorded as available; not stored in the incident]
+
+AMBIGUITIES THAT APPLY (docs/requirements.md §5)
+- AMB-01: "On becoming aware" is not defined; the 72-hour clock and "without delay" both run from it.
+- AMB-02: "Without delay" has no stated maximum for Data Principal intimation or the initial Board intimation.
+- AMB-03: "To the best of its knowledge" may limit who is notified, what is said, or both; later-identified principals are not addressed.
+- AMB-04: "Affected" Data Principal is not defined.
+- AMB-05: No risk, harm or severity threshold is stated; on the text any personal data breach triggers intimation.
+    Applied here: No risk, harm or severity threshold is applied: any breach that meets the definition is reported as requiring intimation.
+
+HUMAN REVIEW CHECKLIST — PLAIN LANGUAGE (BR-DP-03: "concise, clear and plain manner")
+[ ] Concise: each section says only what the reader needs; no repetition.
+[ ] Clear: no unexplained legal, technical or internal terms (incident IDs, system names, acronyms).
+[ ] Plain: short sentences, active voice, a stated subject for every action.
+[ ] Factual: every statement comes from the incident record; nothing added or speculated.
+[ ] Every [NOT PROVIDED] placeholder is resolved, or deliberately left with a recorded reason.
+[ ] The "DRAFT AID — NOT LEGAL ADVICE" header, requirement IDs, rule citations and this checklist are removed before sending.
+[ ] Consequences (BR-DP-06) are stated as "relevant to her" for each recipient group, not generically.
+[ ] Items under "Measures being implemented" come from mitigation.proposed: confirm each is actually being implemented (r. 7(1)(c)).
+[ ] Content reflects what the Data Fiduciary knows now (BR-DP-02, "to the best of its knowledge").
+[ ] Delivery uses the user account or a registered mode (BR-DP-04); recipients with no usable channel are listed for decision (AMB-06).
+[ ] Language(s) of the notice chosen deliberately: Rule 7 states no language requirement.
+"
+`;

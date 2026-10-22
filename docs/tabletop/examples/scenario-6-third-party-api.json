@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "incidentId": "TT-06-THIRD-PARTY-API",
+  "awareness": {
+    "fiduciaryAwareAt": "2028-02-09T16:00:00+05:30",
+    "processorInvolved": null,
+    "processorAwareAt": null,
+    "processorNotifiedFiduciaryAt": "2028-02-09T16:00:00+05:30"
+  },
+  "classification": {
+    "involvesPersonalData": true,
+    "eventTypes": ["accidental_disclosure"],
+    "compromises": { "confidentiality": true, "integrity": false, "availability": false },
+    "exemptionClaims": []
+  },
+  "description": {
+    "nature": "A partner's API endpoint receiving shared customer records was exposed without authentication.",
+    "extent": "About 52,000 customer records could be queried over about 11 days; how many were queried is not yet known.",
+    "occurredAt": "2028-01-29T10:00:00+05:30",
+    "location": null,
+    "likelyImpact": "Exposure of customer identifiers and transaction summaries.",
+    "consequencesForPrincipals": null,
+    "eventsCircumstancesReasons": "The partner deployed an API endpoint without authentication; records were retrievable by URL pattern.",
+    "findingsOnResponsiblePerson": { "status": "none_yet", "summary": null }
+  },
+  "dataCategories": ["customer identifier", "transaction summaries"],
+  "affectedPrincipals": {
+    "estimatedTotal": 52000,
+    "identified": null,
+    "reachableViaUserAccount": null,
+    "reachableViaRegisteredMode": null,
+    "noRegisteredChannel": null,
+    "registeredChannelCompromised": null
+  },
+  "mitigation": {
+    "implemented": ["Data sharing with the partner suspended"],
+    "proposed": ["Require authentication and access logging in partner API contracts"],
+    "safetyMeasuresForPrincipals": null,
+    "remedialMeasuresAgainstRecurrence": null
+  },
+  "queryContactAvailable": true,
+  "noticesSent": [
+    { "kind": "board_initial", "sentAt": "2028-02-10T14:00:00+05:30", "recipientCount": null, "channel": null }
+  ],
+  "extension": { "requestedAt": "2028-02-11T08:00:00+05:30", "grantedUntil": null }
+}

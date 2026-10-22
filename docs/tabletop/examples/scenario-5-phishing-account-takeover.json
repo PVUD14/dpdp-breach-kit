@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "incidentId": "TT-05-PHISHING-ATO",
+  "awareness": {
+    "fiduciaryAwareAt": "2027-11-02T09:20:00+05:30",
+    "processorInvolved": false,
+    "processorAwareAt": null,
+    "processorNotifiedFiduciaryAt": null
+  },
+  "classification": {
+    "involvesPersonalData": true,
+    "eventTypes": ["unauthorised_processing", "accidental_alteration"],
+    "compromises": { "confidentiality": true, "integrity": true, "availability": false },
+    "exemptionClaims": []
+  },
+  "description": {
+    "nature": "A support agent's credentials were phished; the attacker used the session to view customer profiles and change registered email addresses.",
+    "extent": "1,180 customer profiles viewed; registered email changed on 260 accounts.",
+    "occurredAt": "2027-11-02T08:35:00+05:30",
+    "location": "Customer support console (fictional Zephyrine Travel Desk).",
+    "likelyImpact": "Exposure of profile and booking details; account takeover of 260 accounts until restored.",
+    "consequencesForPrincipals": "Unrequested booking changes and possible further phishing using booking details.",
+    "eventsCircumstancesReasons": "Agent entered credentials on a fake sign-in page; the support console did not require a second factor.",
+    "findingsOnResponsiblePerson": { "status": "findings_recorded", "summary": "External attacker using phished staff credentials; not identified." }
+  },
+  "dataCategories": ["contact details", "travel bookings", "company billing contact"],
+  "affectedPrincipals": {
+    "estimatedTotal": 1180,
+    "identified": 1180,
+    "reachableViaUserAccount": 920,
+    "reachableViaRegisteredMode": 260,
+    "noRegisteredChannel": 0,
+    "registeredChannelCompromised": 260
+  },
+  "mitigation": {
+    "implemented": ["Agent account disabled", "Original emails restored and affected accounts locked"],
+    "proposed": ["Second factor for the support console"],
+    "safetyMeasuresForPrincipals": ["Reset your password using the link in your account, not in an email", "Check recent bookings for changes you did not make"],
+    "remedialMeasuresAgainstRecurrence": ["Phishing-resistant sign-in for staff", "Alert on bulk profile views"]
+  },
+  "queryContactAvailable": true,
+  "noticesSent": [
+    { "kind": "board_initial", "sentAt": "2027-11-04T01:20:00+05:30", "recipientCount": null, "channel": null },
+    { "kind": "dp_intimation", "sentAt": "2027-11-04T13:20:00+05:30", "recipientCount": 920, "channel": "user_account" }
+  ],
+  "extension": { "requestedAt": null, "grantedUntil": null }
+}
