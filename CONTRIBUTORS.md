@@ -10,3 +10,4 @@ open a pull request that adds one line below, in alphabetical order by name.
 ## Contributors
 
 <!-- one line each: - Full Name (@github-handle) — what you contributed -->
+- KanaManishaReddy (@Manishakana) — Contributor 1
