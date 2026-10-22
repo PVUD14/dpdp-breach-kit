@@ -31,7 +31,7 @@ the drafts end with the list of ambiguities that apply and a plain-language revi
 | `docs/tabletop/` | Facilitator guide and six fictional tabletop scenarios, each with an example incident record. |
 | `docs/VERIFICATION.md` | Checks a person must do before relying on or publishing this work. |
 | `docs/RELEASE-READINESS.md` | Every claim in the README, this file and the launch drafts, with its evidence. |
-| `docs/images/` | Screenshot of the intake page used in the README. |
+| `docs/images/` | README images: the intake page, and a mockup of the concept Breach console (synthetic data; the console is not in this repository). |
 | `docs/launch/` | Draft launch post and demo-recording steps. |
 | `scripts/` | Network check, source-hash check, and the Vitest launcher. |
 

@@ -65,6 +65,19 @@ Yes. There are [six fictional practice scenarios](docs/tabletop/facilitator-guid
 ransomware at a vendor, a lost laptop, a phishing attack), each with a ready-made file you can open
 in the tool with "Open a saved file…".
 
+## Coming next: Breach console (concept preview)
+
+> **Concept mockup only. Not available to use, not part of this repository, and every company,
+> incident and date in the picture is made up.**
+
+We are exploring a console for organisations that handle more than one incident at a time. It
+would show every open incident on one screen with its 72-hour Board clock, flag what needs
+attention, track approval of each notice before it goes out, and keep a register of how the
+organisation has chosen to read the unclear parts of the law. It would use the same checks and
+drafts as the free tool above.
+
+![Concept mockup of the Breach console: a list of incidents with Board report deadlines, a "Needs attention" panel and a position register. Synthetic data.](docs/images/console-concept.png)
+
 ## Current status (as of 22 October 2026)
 
 - **Draft.** The checks a person must do before relying on this work are listed in
