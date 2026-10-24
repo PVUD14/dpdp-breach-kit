@@ -7,7 +7,7 @@
 export type AmbiguityId =
   | "AMB-01" | "AMB-02" | "AMB-03" | "AMB-04" | "AMB-05" | "AMB-06" | "AMB-07" | "AMB-08"
   | "AMB-09" | "AMB-10" | "AMB-11" | "AMB-12" | "AMB-13" | "AMB-14" | "AMB-15" | "AMB-16"
-  | "AMB-17" | "AMB-18";
+  | "AMB-17" | "AMB-18" | "AMB-19" | "AMB-20";
 
 export type RequirementId =
   | "BR-DP-01" | "BR-DP-02" | "BR-DP-03" | "BR-DP-04" | "BR-DP-05" | "BR-DP-06" | "BR-DP-07"

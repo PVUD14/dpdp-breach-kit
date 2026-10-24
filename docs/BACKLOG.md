@@ -1,5 +1,12 @@
 # Backlog — v0.2
 
+Historical v0.2 proposals, followed by their original acceptance criteria. As of 24 October 2026,
+the response workspace implements the schema extensions and generator ambiguity flags in items
+1 and 5; see RESPONSE-WORKSPACE.md. Item 4 has additional automated browser checks, while manual
+screen-reader and formal accessibility review remain open. Items 2 and 3 remain separate work.
+Item 6 now has a hosting decision and gated workflow prepared in issue #6; activation, review
+and live-site verification remain pending (PUBLIC-RELEASE.md).
+
 Issue-ready entries. Each can be opened as one GitHub issue (one branch per issue, see
 [CONTRIBUTING.md](../CONTRIBUTING.md)). Items marked **needs maintainer approval** change scope or
 rule interpretation and must be agreed before work starts. Nothing here is done in v0.1.

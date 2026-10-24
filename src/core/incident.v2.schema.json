@@ -1,0 +1,577 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:dpdp-breach-kit:incident:2",
+  "title": "DPDP Rule 7 breach incident",
+  "description": "Incident record for DPDP Rules, 2025 Rule 7 intimation. Field meanings and ambiguity IDs: docs/requirements.md. Holds no personal data: principals are counted, not listed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "incidentId",
+    "awareness",
+    "classification",
+    "description",
+    "dataCategories",
+    "affectedPrincipals",
+    "mitigation",
+    "queryContactAvailable",
+    "noticesSent",
+    "extension",
+    "response"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "incidentId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "awareness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fiduciaryAwareAt",
+        "processorInvolved",
+        "processorAwareAt",
+        "processorNotifiedFiduciaryAt"
+      ],
+      "properties": {
+        "fiduciaryAwareAt": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "processorInvolved": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "processorAwareAt": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "processorNotifiedFiduciaryAt": {
+          "$ref": "#/$defs/nullableDateTime"
+        }
+      }
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "involvesPersonalData",
+        "eventTypes",
+        "compromises",
+        "exemptionClaims"
+      ],
+      "properties": {
+        "involvesPersonalData": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "eventTypes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "unauthorised_processing",
+              "accidental_disclosure",
+              "accidental_acquisition",
+              "accidental_sharing",
+              "accidental_use",
+              "accidental_alteration",
+              "accidental_destruction",
+              "accidental_loss_of_access"
+            ]
+          }
+        },
+        "compromises": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "confidentiality",
+            "integrity",
+            "availability"
+          ],
+          "properties": {
+            "confidentiality": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "integrity": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "availability": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        },
+        "exemptionClaims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "clause",
+              "basis"
+            ],
+            "properties": {
+              "clause": {
+                "enum": [
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f"
+                ]
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "description": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nature",
+        "extent",
+        "occurredAt",
+        "location",
+        "likelyImpact",
+        "consequencesForPrincipals",
+        "eventsCircumstancesReasons",
+        "findingsOnResponsiblePerson"
+      ],
+      "properties": {
+        "nature": {
+          "$ref": "#/$defs/nullableText"
+        },
+        "extent": {
+          "$ref": "#/$defs/nullableText"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "location": {
+          "$ref": "#/$defs/nullableText"
+        },
+        "likelyImpact": {
+          "$ref": "#/$defs/nullableText"
+        },
+        "consequencesForPrincipals": {
+          "$ref": "#/$defs/nullableText"
+        },
+        "eventsCircumstancesReasons": {
+          "$ref": "#/$defs/nullableText"
+        },
+        "findingsOnResponsiblePerson": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "summary"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "none_yet",
+                "findings_recorded",
+                null
+              ]
+            },
+            "summary": {
+              "$ref": "#/$defs/nullableText"
+            }
+          }
+        }
+      }
+    },
+    "dataCategories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "affectedPrincipals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "estimatedTotal",
+        "identified",
+        "reachableViaUserAccount",
+        "reachableViaRegisteredMode",
+        "noRegisteredChannel",
+        "registeredChannelCompromised"
+      ],
+      "properties": {
+        "estimatedTotal": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "identified": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "reachableViaUserAccount": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "reachableViaRegisteredMode": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "noRegisteredChannel": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "registeredChannelCompromised": {
+          "$ref": "#/$defs/nullableCount"
+        }
+      }
+    },
+    "mitigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implemented",
+        "proposed",
+        "safetyMeasuresForPrincipals",
+        "remedialMeasuresAgainstRecurrence"
+      ],
+      "properties": {
+        "implemented": {
+          "$ref": "#/$defs/nullableTextList"
+        },
+        "proposed": {
+          "$ref": "#/$defs/nullableTextList"
+        },
+        "safetyMeasuresForPrincipals": {
+          "$ref": "#/$defs/nullableTextList"
+        },
+        "remedialMeasuresAgainstRecurrence": {
+          "$ref": "#/$defs/nullableTextList"
+        }
+      }
+    },
+    "queryContactAvailable": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "noticesSent": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "sentAt",
+          "recipientCount",
+          "channel"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "dp_intimation",
+              "board_initial",
+              "board_detailed"
+            ]
+          },
+          "sentAt": {
+            "$ref": "#/$defs/dateTime"
+          },
+          "recipientCount": {
+            "$ref": "#/$defs/nullableCount"
+          },
+          "channel": {
+            "enum": [
+              "user_account",
+              "registered_mode",
+              "other",
+              null
+            ]
+          }
+        }
+      }
+    },
+    "extension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestedAt",
+        "grantedUntil"
+      ],
+      "properties": {
+        "requestedAt": {
+          "$ref": "#/$defs/nullableDateTime"
+        },
+        "grantedUntil": {
+          "$ref": "#/$defs/nullableDateTime"
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "basis",
+        "basisReason",
+        "containment",
+        "accessActive",
+        "encryption",
+        "noticeLanguages",
+        "childrenCount",
+        "disabilityCount",
+        "guardianRecipients",
+        "jointFiduciaries",
+        "exemptionAssessment",
+        "reviewerRole",
+        "reviewedAt",
+        "reviewNote",
+        "actions",
+        "history",
+        "practice",
+        "discoveredAt",
+        "containmentStartedAt",
+        "preparationStartedAt"
+      ],
+      "properties": {
+        "basis": {
+          "enum": [
+            "",
+            "fiduciary",
+            "processor",
+            "earliest"
+          ]
+        },
+        "basisReason": {
+          "type": "string"
+        },
+        "containment": {
+          "enum": [
+            "unknown",
+            "active",
+            "contained"
+          ]
+        },
+        "accessActive": {
+          "enum": [
+            "unknown",
+            "yes",
+            "no"
+          ]
+        },
+        "encryption": {
+          "enum": [
+            "unknown",
+            "encrypted",
+            "not_encrypted"
+          ]
+        },
+        "noticeLanguages": {
+          "type": "string"
+        },
+        "childrenCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "disabilityCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "guardianRecipients": {
+          "enum": [
+            "unknown",
+            "principals",
+            "guardians",
+            "both"
+          ]
+        },
+        "jointFiduciaries": {
+          "enum": [
+            "unknown",
+            "yes",
+            "no"
+          ]
+        },
+        "exemptionAssessment": {
+          "type": "string"
+        },
+        "reviewerRole": {
+          "type": "string"
+        },
+        "reviewedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "reviewNote": {
+          "type": "string"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "description",
+              "ownerRole",
+              "status",
+              "updatedAt"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "ownerRole": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "pending",
+                  "in_progress",
+                  "done"
+                ]
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "at",
+              "description"
+            ],
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "practice": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "scenario",
+            "step",
+            "startedAt"
+          ],
+          "properties": {
+            "scenario": {
+              "type": "string",
+              "minLength": 1
+            },
+            "step": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "startedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "discoveredAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "containmentStartedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "preparationStartedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "dateTime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "nullableDateTime": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "nullableText": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "nullableTextList": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "nullableCount": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    }
+  }
+}

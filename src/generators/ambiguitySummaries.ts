@@ -5,6 +5,8 @@ import type { AmbiguityId } from "../core/ambiguities";
  * there governs; tests/traceability.test.ts and tests/generators.test.ts check the IDs exist.
  */
 export const AMBIGUITY_SUMMARIES: Readonly<Record<AmbiguityId, string>> = {
+  "AMB-19": "Confirm recipients and registered channels for children and persons with disability; the tool does not choose between principals, parents or lawful guardians.",
+  "AMB-20": "Where several organisations act as fiduciaries, agree responsibility for notices and handling duplicate notices; the tool does not assign responsibility.",
   "AMB-01": '"On becoming aware" is not defined; the 72-hour clock and "without delay" both run from it.',
   "AMB-02": '"Without delay" has no stated maximum for Data Principal intimation or the initial Board intimation.',
   "AMB-03": '"To the best of its knowledge" may limit who is notified, what is said, or both; later-identified principals are not addressed.',

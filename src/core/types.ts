@@ -7,6 +7,7 @@
  */
 
 /** ISO-8601 date-time with an explicit offset, e.g. "2026-10-22T12:13:00+05:30" or "...Z". */
+import type { ResponseState } from "./response";
 export type IsoDateTime = string;
 
 /** The event limbs of Act s.2(u). */
@@ -41,7 +42,9 @@ export interface NoticeRecord {
 }
 
 export interface Incident {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
+  /** Version 2 adds response preparation state; version 1 files remain readable. */
+  response?: ResponseState;
   incidentId: string;
   awareness: {
     /** When the Data Fiduciary became aware (r. 7(1), 7(2)). See AMB-01. */

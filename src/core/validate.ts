@@ -1,4 +1,5 @@
 import schema from "./incident.schema.json";
+import schemaV2 from "./incident.v2.schema.json";
 import { parseIsoWithOffset } from "./time";
 import type { Incident } from "./types";
 
@@ -110,8 +111,14 @@ function check(value: unknown, rawNode: Node, path: string, errors: string[]): v
 
 export function validateIncident(input: unknown): ValidationResult {
   const errors: string[] = [];
-  check(input, root, "$", errors);
+  const object = input && typeof input === "object" && !Array.isArray(input) ? input as Node : null;
+  if (object?.["schemaVersion"] === 2) {
+    check(input, schemaV2 as unknown as Node, "$", errors);
+  } else {
+    check(input, root, "$", errors);
+  }
   return errors.length === 0 ? { ok: true, incident: input as Incident } : { ok: false, errors };
 }
 
 export { schema as incidentSchema };
+export { schemaV2 as incidentSchemaV2 };

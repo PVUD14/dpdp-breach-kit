@@ -7,6 +7,7 @@ import { commencementBanner } from "../core/commencement";
 import { computeBoardReportDeadline, type AwarenessBasis } from "../core/deadline";
 import { formatDuration, parseIsoWithOffset, toEpochMs, toIstIso } from "../core/time";
 import type { Incident } from "../core/types";
+import type { ResponseState } from "../core/response";
 import { validateIncident } from "../core/validate";
 import { trackWithoutDelay } from "../core/withoutDelay";
 import { generateBoardReports } from "../generators/boardReports";
@@ -309,6 +310,7 @@ export const REPEATS: RepeatSpec[] = [
 export type Row = Record<string, string>;
 
 export interface FormState {
+  response?: ResponseState;
   /** Raw input per FieldSpec path (all kinds except enumSet). */
   values: Record<string, string>;
   /** Selected values for enumSet fields. */
@@ -431,6 +433,7 @@ function convertField(f: FieldSpec, state: FormState, errors: FieldError[]): unk
 export function formToIncident(state: FormState): ConversionResult {
   const errors: FieldError[] = [];
   const out: Record<string, unknown> = { schemaVersion: 1 };
+  if (state.response) { out["schemaVersion"] = 2; out["response"] = state.response; }
   for (const f of ALL_FIELDS) setPath(out, f.path, convertField(f, state, errors));
 
   setPath(
@@ -480,6 +483,7 @@ function schemaErrorToFieldError(message: string): FieldError {
 
 export function incidentToForm(incident: Incident): FormState {
   const state = emptyFormState();
+  if (incident.response) state.response = structuredClone(incident.response);
   for (const f of ALL_FIELDS) {
     const v = getPath(incident, f.path);
     switch (f.kind) {

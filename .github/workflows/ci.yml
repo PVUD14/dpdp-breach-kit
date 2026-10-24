@@ -67,9 +67,7 @@ jobs:
     name: Intake page network check (headless Chrome)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Untested on Linux so far. Remove `continue-on-error` after the first green run so that a
-    # failure (an outside request, CSP violation, storage use) blocks the build.
-    continue-on-error: true
+    # Linux job verified green in run 39946544763. Privacy failures now block release.
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -91,6 +89,11 @@ jobs:
         env:
           CHROME_NO_SANDBOX: "1"
         run: npm run check:network
+      - name: Check repository-subpath deployment
+        env:
+          CHROME_NO_SANDBOX: "1"
+          CHECK_BASE_PATH: /dpdp-breach-kit
+        run: node scripts/check-network.mjs
 
   secret-scan:
     name: Secret scan
@@ -109,3 +112,46 @@ jobs:
           # Pin the scanner image to the same release as the action (the default is "latest").
           version: "3.99.3"
           extra_args: --results=verified,unknown
+
+  pages-build:
+    name: Package reviewed demo
+    needs: [build, network-check, secret-scan]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Upload only the static application
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: dist/app
+
+  pages-deploy:
+    name: Deploy public practice demo
+    needs: pages-build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy static artifact
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
