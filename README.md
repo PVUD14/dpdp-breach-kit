@@ -1,4 +1,4 @@
-# Breach Guide · dpdp-breach-kit
+# Breach Guide · DPDP-breach-kit
 
 <img src="public/brand/breach-guide-logo.png" width="96" alt="Breach Guide logo" />
 
