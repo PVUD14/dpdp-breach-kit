@@ -1,5 +1,10 @@
 node_modules/
 dist/
+artifacts/
+tmp/
+output/
+logo.psd
+*.incident.json
 .env*
 .claude/settings.local.json
 docs/source/*.pdf

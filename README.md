@@ -1,4 +1,24 @@
-# dpdp-breach-kit
+# Breach Guide · dpdp-breach-kit
+
+<img src="public/brand/breach-guide-logo.png" width="96" alt="Breach Guide logo" />
+
+A free, open-source guide for people who need a place to start after a possible privacy
+incident. Answer six plain-language questions, identify what is still unknown, and download
+a summary for your manager or privacy reviewer. No account or paid service is needed.
+
+## Start here
+
+- **Browser demo (pending first deployment):** [Breach Guide on GitHub Pages](https://pvud14.github.io/dpdp-breach-kit/).
+  This link becomes available after the release PR is reviewed and merged, Pages is enabled,
+  and the CI deployment succeeds. If it returns 404, use the local instructions below.
+- **Visual walkthrough:** [Download the PDF SOP](public/guide/Breach-Guide-SOP.pdf).
+- **Prefer text?** [Beginner instructions](docs/GETTING-STARTED.md).
+- **Want to practise?** Open “Just exploring? Try a fictional example.” in the application.
+
+Use fictional information in the public demo. This is a community draft aid, not a government
+service, official filing portal or compliance guarantee. No report is submitted automatically.
+
+![Breach Guide welcome screen](docs/assets/welcome.png)
 
 > **Status: draft.** This is a draft aid, not legal advice, and it has not been independently verified.
 > The human verification checklist in [docs/VERIFICATION.md](docs/VERIFICATION.md) is not yet complete.
@@ -69,11 +89,22 @@ the drafts end with the list of ambiguities that apply and a plain-language revi
 
 ## Using the intake page
 
+Install a compatible Node.js version (the project requires 22.12 or later) and Git, then open
+a terminal in a folder where you want to keep the project. The commands do not require a
+particular drive or folder name:
+
 ```sh
+git clone https://github.com/PVUD14/dpdp-breach-kit.git
+cd dpdp-breach-kit
 npm ci
 npm run build      # library into dist/, intake page into dist/app/
-npm run preview    # serves dist/app/ on localhost
+npm run preview -- --host 127.0.0.1 --port 4173 --strictPort
 ```
+
+Open **http://127.0.0.1:4173/** on the same computer. Keep the terminal open; stop it with
+Ctrl+C after saving. On Windows PowerShell, use `npm.cmd` instead of `npm` if script execution
+is blocked. Without Git, use **Code → Download ZIP**, extract it, and open a terminal inside
+the extracted project folder before `npm ci`.
 
 **Serving requirement.** The page must be served over HTTP or HTTPS. Opening `dist/app/index.html`
 directly from disk (`file://`) does not work, because browsers block ES modules there. Any static
@@ -82,16 +113,21 @@ file server can host `dist/app/`. Copy-to-clipboard additionally needs a secure 
 `<meta>` tag; if you host the page, also send it as an HTTP header, which is the only way to add
 `frame-ancestors`.
 
-**Privacy.** The page makes no network requests (CSP `connect-src 'none'`), uses no browser
+**Privacy.** After loading its local/static assets, the app makes no API requests and does not
+transmit answers (CSP `connect-src 'none'`). It uses no browser
 storage, cookies or service workers, and keeps the record in memory only: **export the incident
 JSON to keep it.** Imported files are checked against the schema and rejected if they contain
 unknown fields. Do not enter names, contact details or other personal data: the record holds
-counts and descriptions only.
+counts and descriptions only. A public host receives ordinary page-request metadata; the
+app's privacy checks do not audit GitHub's hosting logs. Downloaded files are not automatically
+encrypted. See [hosting decision and limitations](docs/PUBLIC-RELEASE.md).
 
-**Accessibility.** Two things have been checked automatically: arrow-key navigation between the
-draft tabs, and that every input, select and text area has a label. The form is built from native
-controls and buttons so it can be used with a keyboard, but full keyboard use has not been tested
-end to end. No other accessibility conformance is claimed.
+**Accessibility.** The local Chrome checks cover labels, draft-tab arrow keys, keyboard
+reachability of visible controls, 360px overflow, and non-announcing timer panels. Lighthouse
+12.8.2 scored 100/100 on the start, interview, beginner summary, reviewer, practice, and mobile dark-mode states
+on 24 October 2026. These are automated checks, not a claim of full accessibility conformance.
+Desktop and mobile screen-reader walkthroughs remain unverified; see
+[docs/RESPONSE-WORKSPACE.md](docs/RESPONSE-WORKSPACE.md).
 
 ## Tabletop exercises
 
@@ -131,35 +167,30 @@ Requires Node.js 22.12 or later.
 | `npm run check:network` | Builds `dist/app/`, serves it on `127.0.0.1`, and drives a local headless Chrome/Chromium through the page (fill, tabs, copy, download, export, import, 360px width). Fails on any request outside the page's own origin, any CSP violation or page exception, or any storage or cookie use. Needs Chrome or Chromium installed; no npm dependency. Set `CHROME_PATH` to choose the binary and `CHROME_NO_SANDBOX=1` where the Chrome sandbox is unavailable. Runs in CI as a non-blocking job until its first green run on Linux. |
 | `npm run verify:sources` | Recomputes the SHA-256 of every PDF in `docs/source/` and compares it with the values recorded in `docs/requirements.md` §1. Exit 0: all match. Exit 1: a mismatch, or a PDF with no recorded hash. Exit 2: "sources not downloaded" — prints each missing file's URL and expected SHA-256. Exit 3: the table could not be read. CI treats exit 2 as a skip and downloads nothing. |
 
-## Known limitations
+## Response workspace (version 0.2.0)
 
-These are open. None of them is fixed in this version.
+Start a new incident with a six-step interview, import a saved record, or practise with any of
+six fictional tabletop scenarios. The response overview connects missing facts to the form,
+flags contradictory answers, tracks actions and review notes, and shows the existing deadline
+calculation with an explicit clock choice and a recorded reason.
 
-**Incident schema gaps.** The incident record (`src/core/incident.schema.json`) has no field for:
+Download a single plain-text response pack containing all three drafts, an internal summary,
+review checklist, timing assumptions, and action/evidence log. Export the version 2 incident
+JSON separately to reopen your work. Older version 1 files are upgraded in memory with a notice.
+Neither format writes to browser storage. Confirm that your requested download completed.
 
-- **Encryption status** of the affected data or device (relevant, for example, to a lost laptop).
-  The checklist cannot take it into account, and Rule 7 states no threshold that would (AMB-05).
-- **Notice language.** The language(s) of the Data Principal notice are not recorded; Rule 7 states
-  no language requirement. The Data Principal draft's review checklist asks a person to choose the
-  language deliberately.
-- **Guardian recipients.** There is no way to record that affected Data Principals are children or
-  persons with disability, or that intimation goes to parents or lawful guardians.
-- **Exemption-assessment outcome.** An Act s.17(1) exemption can be *claimed*, but the result of a
-  legal assessment cannot be recorded, so the checklist keeps reporting
-  "requires legal determination" (AMB-15).
+Version 2 records encryption, notice languages, affected children/disability counts, planned
+guardian recipients, joint fiduciaries, and an exemption assessment reference. AMB-19 and AMB-20
+are now surfaced in drafts when the recorded facts trigger them. These fields do not make legal
+decisions or change the existing exemption or encryption interpretation.
 
-**Ambiguities recorded but not handled in the drafts.** Two points found while writing the
-tabletop scenarios are now recorded in `docs/requirements.md` §5 but are not yet handled by the
-core checks or the generators; the drafts do not list them:
+Practice reveals the existing scenarios' timed updates one at a time with a simulated clock.
+Practice drafts are marked **FICTIONAL PRACTICE — DO NOT SEND** and the pack includes a debrief.
 
-- **AMB-19 — "Data Principal" for children and persons with disability (Act s.2(j)).** The
-  definition includes parents or lawful guardians; Rule 7(1) does not say who receives the
-  intimation or whose registered channel is meant.
-- **AMB-20 — more than one Data Fiduciary (Act s.2(i)).** A fiduciary may act "in conjunction with
-  other persons"; Rule 7 does not say which fiduciary intimates, whether each must, or how
-  duplicate notices are handled.
-
-Planned work is in [docs/BACKLOG.md](docs/BACKLOG.md).
+See [docs/RESPONSE-WORKSPACE.md](docs/RESPONSE-WORKSPACE.md) for implementation and verification.
+Reviews and activity logs are self-reported and editable. Full screen-reader/accessibility review
+and the human/legal verification checklist remain open. GitHub Pages deployment is prepared;
+see [release and hosting steps](docs/PUBLIC-RELEASE.md) for activation and verification.
 
 ## Contributing, security and licence
 

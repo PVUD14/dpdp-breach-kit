@@ -95,6 +95,20 @@ export function determinationLines(incident: Incident): { lines: string[]; inter
     lines.push("WARNING: the checklist does not report intimation as required — resolve before sending.");
   }
   if (c.missingFacts.length) lines.push(`Checklist facts not recorded: ${c.missingFacts.join(", ")}.`);
+  const r = incident.response;
+  if (r) {
+    if (r.practice) lines.unshift("FICTIONAL PRACTICE — DO NOT SEND");
+    if ((r.childrenCount ?? 0) > 0 || (r.disabilityCount ?? 0) > 0 || r.guardianRecipients !== "unknown") c.interpretation.push({
+      ambiguityId: "AMB-19", requirementIds: ["BR-DP-01"],
+      choice: "Flagged recipient and channel questions for human review; no recipient was chosen.",
+      alternatives: ["Notice to the affected person", "Notice to parent or lawful guardian", "Notice to both"]
+    });
+    if (r.jointFiduciaries === "yes") c.interpretation.push({
+      ambiguityId: "AMB-20", requirementIds: ["BR-GEN-01"],
+      choice: "Flagged joint-fiduciary responsibility for human review; no sender was chosen.",
+      alternatives: ["Separate notices", "Coordinated notice, subject to legal review"]
+    });
+  }
   return { lines, interpretation: c.interpretation };
 }
 

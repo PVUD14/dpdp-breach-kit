@@ -22,6 +22,8 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const APP_DIR = path.join(ROOT, "dist", "app");
+const BASE_PATH = process.env.CHECK_BASE_PATH ?? "";
+if (BASE_PATH && !/^\/[a-zA-Z0-9_-]+$/.test(BASE_PATH)) throw new Error("CHECK_BASE_PATH must be a single /repository-name prefix.");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function findChrome() {
@@ -58,10 +60,14 @@ async function main() {
 
   // ---------------------------------------------------------------- static server
   const serverLog = [];
-  const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
+  const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".pdf": "application/pdf" };
   const server = http.createServer((req, res) => {
     serverLog.push(`${req.method} ${req.url}`);
-    const rel = decodeURIComponent(new URL(req.url, "http://x").pathname).replace(/^\/+/, "") || "index.html";
+    const pathname = decodeURIComponent(new URL(req.url, "http://x").pathname);
+    if (BASE_PATH && !pathname.startsWith(`${BASE_PATH}/`)) {
+      res.writeHead(404); res.end(); return;
+    }
+    const rel = pathname.slice(BASE_PATH.length).replace(/^\/+/, "") || "index.html";
     const file = path.resolve(APP_DIR, rel);
     if (!file.startsWith(APP_DIR + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
       res.writeHead(404);
@@ -173,9 +179,15 @@ async function main() {
       return false;
     };
 
-    await s("Page.navigate", { url: `${origin}/index.html` });
+    await s("Page.navigate", { url: `${origin}${BASE_PATH}/index.html` });
     check("page rendered", await waitFor(`!!document.querySelector("h1")`));
+    check("brand image loads from the served path", await waitFor(`document.querySelector('img.brand-logo')?.naturalWidth > 0`));
     check("personal-data warning visible", await evaluate(`document.querySelector('[role=note]')?.textContent.includes("Don't type names")`));
+    check("start screen hides the long form", await evaluate(`document.querySelector('main').hidden`));
+    await evaluate(`[...document.querySelectorAll('button')].find(b => b.textContent === 'Start a new incident').click()`);
+    check("guided interview starts with plain-language choices", await evaluate(`document.getElementById('wizard-heading').textContent === 'What happened?' && document.querySelectorAll('.incident-choice').length === 6`));
+    await evaluate(`[...document.querySelectorAll('button')].find(b => b.textContent === 'Open full incident form').click()`);
+    check('opening full form transfers focus to its heading', await evaluate(`document.activeElement.id === 'form-title'`));
 
     await evaluate(`(() => {
       const set = (id, v) => {
@@ -192,8 +204,15 @@ async function main() {
       set("f-classification-compromises-confidentiality", "true");
     })()`);
     check("form errors clear once the reference is entered", await waitFor(`document.querySelector(".errors").children.length === 0`));
+    await evaluate(`(() => { const field = document.getElementById('f-incidentId'); field.focus(); field.value = ''; field.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+    check('invalid reference keeps the current editor and error visible', await evaluate(`document.querySelector('#app').dataset.view === 'reviewer' && !document.querySelector('main').hidden && document.querySelector('.response-launch').hidden && document.querySelector('.errors').children.length > 0 && document.activeElement.id === 'f-incidentId'`));
+    await evaluate(`[...document.querySelectorAll('button')].find(b => b.textContent === 'Your next steps').click()`);
+    check('invalid summary has a recovery action instead of going blank', await evaluate(`!document.querySelector('.beginner-overview').hidden && document.querySelector('.beginner-overview').textContent.includes('One answer needs checking')`));
+    await evaluate(`[...document.querySelectorAll('button')].find(b => b.textContent === 'Return to the answer').click()`);
+    check('recovery focuses the validation errors', await evaluate(`document.activeElement.classList.contains('errors') && !document.querySelector('main').hidden`));
+    await evaluate(`(() => { const field = document.getElementById('f-incidentId'); field.value = 'INC-CHECK-1'; field.dispatchEvent(new Event('input', { bubbles: true })); })()`);
     check("user input rendered as text, not markup", await evaluate(
-      `document.querySelectorAll("img").length === 0 && document.querySelector("pre.draft")?.textContent.includes("<img src=x onerror=alert(1)>")`,
+      `document.querySelectorAll("img").length === 1 && document.querySelector("img.brand-logo")?.getAttribute("src") === "./brand/breach-guide-logo.png" && !document.querySelector("img[onerror]") && document.querySelector("pre.draft")?.textContent.includes("<img src=x onerror=alert(1)>")`,
     ));
 
     await evaluate(`(() => { const b = document.getElementById("basis"); b.value = "fiduciary"; b.dispatchEvent(new Event("change")); })()`);
@@ -252,6 +271,111 @@ async function main() {
     );
     check("every input, select and textarea has a label", unlabelled.length === 0, unlabelled.join(", "));
 
+    // Exercise version 2 response state and the full interview using synthetic values only.
+    await evaluate(`window.confirm = () => true`);
+    const setResponse = async (id, value) => evaluate(`(() => { const input = document.getElementById(${JSON.stringify(id)}); input.value = ${JSON.stringify(value)}; input.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+    await setResponse('f-response-containment', 'contained');
+    await setResponse('f-response-accessActive', 'yes');
+    check('contradictory containment is surfaced', await evaluate(`document.querySelector('.response-dashboard').textContent.includes('unauthorised access is still active')`));
+    await setResponse('f-response-reviewerRole', 'Legal adviser');
+    await setResponse('f-response-reviewNote', 'Synthetic review recorded');
+    await clickButton('Record review of current answers');
+    check('review is recorded', await evaluate(`document.querySelector('.response-dashboard').textContent.includes('Review recorded for current answers')`));
+    await setResponse('f-response-noticeLanguages', 'English');
+    check('later edits invalidate review', await evaluate(`document.querySelector('.response-dashboard').textContent.includes('Human review pending')`));
+    await setResponse('new-action', 'Confirm affected data');
+    await setResponse('new-action-owner', 'IT');
+    await clickButton('Add action');
+    check('new action is announced', await evaluate(`document.querySelector('.status').textContent.includes('Action added: Confirm affected data')`));
+    check('response action appears', await evaluate(`document.querySelector('.response-task').textContent.includes('Confirm affected data')`));
+    await clickButton('Download response pack');
+    check('response pack download is announced', await evaluate(`document.querySelector('.status').textContent.includes('Response pack download requested')`));
+    for (let t = 0; t < 3000 && !fs.readdirSync(downloads).some(f => f.endsWith('.response-pack.txt')); t += 100) await sleep(100);
+    const packName = fs.readdirSync(downloads).find(f => f.endsWith('.response-pack.txt'));
+    const pack = packName ? fs.readFileSync(path.join(downloads, packName), 'utf8') : '';
+    check('response pack contains summary, action register and review checklist', ['INTERNAL SUMMARY', 'ACTION REGISTER', 'REVIEW CHECKLIST', 'Confirm affected data'].every(s => pack.includes(s)));
+    await evaluate(`(() => { const f = document.getElementById('f-incidentId'); f.value = 'INC-RESPONSE-CHECK'; f.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+    await clickButton('Save to file');
+    const responseFile = path.join(downloads, 'INC-RESPONSE-CHECK.incident.json');
+    for (let t = 0; t < 3000 && !fs.existsSync(responseFile); t += 100) await sleep(100);
+    check('version 2 backup preserves actions and clock basis', fs.existsSync(responseFile) && (() => { const data = JSON.parse(fs.readFileSync(responseFile, 'utf8')); return data.schemaVersion === 2 && data.response.basis === 'fiduciary' && data.response.actions[0]?.description === 'Confirm affected data'; })());
+    await clickButton('Start a new incident');
+    await evaluate(`(() => { const f = document.getElementById('f-description-nature'); f.value = 'Synthetic guided incident'; f.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+    for (let step = 1; step < 6; step++) await clickButton('Continue');
+    await clickButton('See my response plan');
+    check('interview completion focuses the beginner overview', await evaluate(`document.activeElement.id === 'beginner-overview-title'`));
+    check('six-step interview preserves answers', await evaluate(`document.getElementById('f-description-nature').value === 'Synthetic guided incident'`));
+    check('beginner sees three next steps without legal clock choices', await evaluate(`document.querySelectorAll('.next-step-cards > li').length === 3 && document.querySelector('main').hidden && document.querySelector('.response-clocks').hidden && document.querySelector('.response-details').hidden`));
+    await clickButton('Save summary for review');
+    for (let t = 0; t < 3000 && !fs.readdirSync(downloads).some(f => f.endsWith('.summary.txt')); t += 100) await sleep(100);
+    const summaryName = fs.readdirSync(downloads).find(f => f.endsWith('.summary.txt'));
+    check('beginner summary downloads recorded facts for handoff', summaryName && fs.readFileSync(path.join(downloads, summaryName), 'utf8').includes('Synthetic guided incident'));
+    await clickButton('Review my answers');
+    const backupsBefore = fs.readdirSync(downloads).filter(f => f.endsWith('.incident.json')).length;
+    await clickButton('Save and continue later');
+    for (let t = 0; t < 3000 && fs.readdirSync(downloads).filter(f => f.endsWith('.incident.json')).length <= backupsBefore; t += 100) await sleep(100);
+    check('guided answers can be saved before finishing', fs.readdirSync(downloads).filter(f => f.endsWith('.incident.json')).length > backupsBefore);
+    for (let step = 0; step < 6; step++) await clickButton("I don't know yet");
+    check('unknown answers can complete the guide without invented facts', await evaluate(`document.querySelector('#app').dataset.view === 'summary' && document.getElementById('f-description-nature').value === '' && document.getElementById('basis').value === '' && document.querySelector('.beginner-facts').textContent.includes('Not known yet')`));
+    await clickButton('For your reviewer');
+    check('reviewer view deliberately reveals technical controls', await evaluate(`!document.querySelector('main').hidden && !document.querySelector('.response-clocks').hidden && document.querySelector('.beginner-overview').hidden`));
+    await clickButton('Start practice');
+    check('practice starts at first inject', await evaluate(`document.querySelector('.response-practice').textContent.includes('FICTIONAL PRACTICE') && document.querySelectorAll('.response-practice li').length === 1`));
+    await clickButton('Reveal next update');
+    check('practice update receives focus for reading', await evaluate(`document.activeElement.id === 'practice-current-update'`));
+    check('practice reveals one additional inject', await evaluate(`document.querySelectorAll('.response-practice li').length === 2`));
+    check('practice drafts are clearly labelled', await evaluate(`document.querySelector('.draft').textContent.includes('FICTIONAL PRACTICE')`));
+    await clickButton('Open full incident form');
+    await clickButton('Save to file');
+    const practiceName = await evaluate(`document.getElementById('f-incidentId').value + '.incident.json'`);
+    const practiceFile = path.join(downloads, practiceName);
+    for (let t = 0; t < 3000 && !fs.existsSync(practiceFile); t += 100) await sleep(100);
+    const { result: { root: updatedRoot } } = await s('DOM.getDocument', {});
+    const { result: { nodeId: importNode } } = await s('DOM.querySelector', { nodeId: updatedRoot.nodeId, selector: '#import-file' });
+    await s('DOM.setFileInputFiles', { nodeId: importNode, files: [responseFile] });
+    check('reopening restores task controls and clock selection', await waitFor(`document.getElementById('basis').value === 'fiduciary' && document.querySelector('.response-task')?.textContent.includes('Confirm affected data') && document.querySelector('.response-practice').hidden`));
+    await s('DOM.setFileInputFiles', { nodeId: importNode, files: [practiceFile] });
+    check('practice progress survives reopening', await waitFor(`!document.querySelector('.response-practice').hidden && document.querySelectorAll('.response-practice li').length === 2`));
+    await evaluate(`document.querySelector('.response-launch button').focus()`);
+    let keyboardOk = true;
+    for (let i = 0; i < 30; i++) {
+      await s('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+      await s('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+      keyboardOk &&= await evaluate(`!!document.activeElement && !document.activeElement.closest('[hidden]')`);
+    }
+    check('keyboard Tab traversal avoids hidden controls', keyboardOk);
+    const focusableCount = await evaluate(`(() => {
+      window.__focusTargets = [...document.querySelectorAll('button,input,select,textarea,a[href],summary,[tabindex="0"]')].filter(e => {
+        if (e.disabled || e.tabIndex < 0 || !e.getClientRects().length || getComputedStyle(e).visibility === 'hidden') return false;
+        for (let p = e.parentElement; p; p = p.parentElement) if (p.tagName === 'DETAILS' && !p.open && !p.querySelector(':scope > summary')?.contains(e)) return false;
+        return true;
+      });
+      window.__focusTargets[0].focus(); return window.__focusTargets.length;
+    })()`);
+    const reached = new Set([0]);
+    for (let i = 0; i < focusableCount * 4 && reached.size < focusableCount; i++) {
+      await s('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+      await s('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+      const index = await evaluate('window.__focusTargets.indexOf(document.activeElement)');
+      if (index >= 0) reached.add(index);
+    }
+    const unreached = await evaluate(`window.__focusTargets.filter((e, i) => !${JSON.stringify([...reached])}.includes(i)).map(e => e.id || e.textContent.slice(0, 80))`);
+    check('all visible controls are reachable by keyboard', reached.size === focusableCount, unreached.join(', '));
+    check('timer panels are not live regions', await evaluate(`!document.querySelector('[aria-labelledby=deadline-title]').closest('[aria-live]') && !document.querySelector('[aria-labelledby=elapsed-title]').closest('[aria-live]')`));
+    await clickButton('Start over');
+    check('explicit reset returns to the start screen', await evaluate(`document.querySelector('#app').dataset.view === 'landing' && !document.querySelector('.response-launch').hidden && document.querySelector('main').hidden`));
+    check('empty reset does not retain an unsaved-changes warning', await evaluate(`(() => { const event = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(event); return !event.defaultPrevented; })()`));
+    await evaluate(`document.querySelector('a[download="Breach-Guide-SOP.pdf"]').click()`);
+    const guideFile = path.join(downloads, 'Breach-Guide-SOP.pdf');
+    for (let t = 0; t < 5000 && !fs.existsSync(guideFile); t += 100) await sleep(100);
+    check('public PDF downloads from the served path', fs.existsSync(guideFile) && fs.readFileSync(guideFile).subarray(0, 5).toString() === '%PDF-');
+    if (process.env.CAPTURE_RESPONSE_UI === '1') {
+      await s('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+      await evaluate(`document.querySelector('.response-dashboard').scrollIntoView({block:'start'})`);
+      const shot = await s('Page.captureScreenshot', { format: 'png' });
+      fs.writeFileSync(path.join(ROOT, 'dist', 'response-workspace.png'), Buffer.from(shot.result.data, 'base64'));
+    }
+
     await sleep(300);
 
     // ---------------------------------------------------------------- network verdict
@@ -264,7 +388,7 @@ async function main() {
       url.startsWith(`${origin}/`) || url.startsWith("blob:") || url.startsWith("data:");
     const foreign = requests.filter((u) => !allowed(u));
     check("no request outside the page's own origin", foreign.length === 0, foreign.join(", "));
-    const unexpectedServer = serverLog.filter((l) => !/^GET \/(index\.html|assets\/[\w.-]+|favicon\.ico)$/.test(l));
+    const unexpectedServer = serverLog.filter((l) => !/^GET \/(index\.html|assets\/[\w.-]+|favicon\.ico|brand\/breach-guide-logo\.png|guide\/Breach-Guide-SOP\.pdf)$/.test(BASE_PATH ? l.replace(`GET ${BASE_PATH}/`, "GET /") : l));
     check("server saw only page assets", unexpectedServer.length === 0, unexpectedServer.join(", "));
 
     const logs = events.filter((e) => e.sessionId === sessionId);

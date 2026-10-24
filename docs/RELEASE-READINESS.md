@@ -1,5 +1,9 @@
 # Release readiness — claims and evidence
 
+Update, 24 October 2026: this table is the historical v0.1 record. The v0.2 response workspace
+changes are described in [RESPONSE-WORKSPACE.md](RESPONSE-WORKSPACE.md). Fresh automated results
+do not complete the independent human/legal verification checklist below.
+
 Every claim made in [README.md](../README.md) and [launch/linkedin-post.md](launch/linkedin-post.md),
 with the evidence for it and who has checked it. Prepared 2026-10-22.
 

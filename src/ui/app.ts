@@ -19,7 +19,6 @@ import {
   formToIncident,
   incidentToForm,
   labelForPath,
-  nowIso,
   parseIncidentFile,
   progressOf,
   type Basis,
@@ -31,7 +30,10 @@ import {
   type RowFieldSpec,
 } from "./model";
 import type { Incident } from "../core/types";
-import { heroIllustration, icon, ring, setRing, type IconName } from "./icons";
+import { emptyResponse } from "../core/response";
+import { mountWorkspace, practiceNow } from "./workspace";
+import { icon, ring, setRing, type IconName } from "./icons";
+import { DATA_CHOICES, INCIDENT_CHOICES } from "./beginner";
 
 const GROUP_ICONS: Record<string, IconName> = {
   incident: "info",
@@ -79,6 +81,17 @@ interface AppState {
 
 export function mountApp(root: HTMLElement): void {
   const state: AppState = { form: emptyFormState(), basis: "", incident: null, activeTab: 0, tabChanged: false };
+  state.form.response = emptyResponse();
+  let wizardStep = -1;
+  let reviewer = false;
+  let hasSession = false;
+  let previousAnswers = "";
+  const wizardPaths = [
+    ["description.nature"], ["awareness.fiduciaryAwareAt"],
+    ["dataCategories"], ["affectedPrincipals.estimatedTotal"], [], ["mitigation.implemented"]
+  ];
+  const wizardTitles = ["What happened?", "When did you find out?", "What data may be involved?", "How many people may be affected?", "Is the incident still active?", "What have you done so far?"];
+  const workspaceRoot = el("div", { class: "response-workspace" });
 
   // ------------------------------------------------------------ static frame
 
@@ -88,7 +101,7 @@ export function mountApp(root: HTMLElement): void {
   const commencementBody = el("div", { class: "banner-body", "aria-labelledby": "commencement-title" });
   const commencement = el("details", { class: "banner" }, commencementSummary, commencementBody);
   const formEl = el("form", { class: "intake", "aria-labelledby": "form-title", novalidate: "" });
-  const errorsBox = el("div", { class: "errors", "aria-live": "polite" });
+  const errorsBox = el("div", { class: "errors", "aria-live": "polite", tabindex: "-1" });
   const checklistBox = el("section", { class: "card panel", "aria-labelledby": "checklist-title" });
   const basisSelect = el("select", { id: "basis", "aria-describedby": "basis-help" });
   for (const o of BASIS_OPTIONS) basisSelect.append(el("option", { value: o.value }, o.label));
@@ -97,7 +110,7 @@ export function mountApp(root: HTMLElement): void {
   const draftsBox = el("section", { class: "card drafts", id: "drafts", "aria-labelledby": "drafts-title" });
 
   const importInput = el("input", { type: "file", id: "import-file", accept: ".json,application/json", class: "visually-hidden" });
-  const importLabel = el("label", { for: "import-file", class: "button primary" }, icon("upload"), "Open a saved file…");
+  const importLabel = el("label", { for: "import-file", class: "button ghost" }, icon("upload"), "Open a saved file…");
   const exportButton = el("button", { type: "button", class: "secondary" }, icon("download"), "Save to file");
   const resetButton = el("button", { type: "button", class: "ghost" }, icon("refresh"), "Start over");
 
@@ -125,15 +138,15 @@ export function mountApp(root: HTMLElement): void {
         el(
           "div",
           { class: "brand" },
-          el("span", { class: "brand-mark" }, icon("shield")),
+          el("img", { class: "brand-logo", src: "./brand/breach-guide-logo.png", alt: "", width: "1347", height: "1553" }),
           el(
             "div",
             {},
-            el("h1", {}, "Data breach notice helper"),
-            el("p", { class: "subtitle" }, "Prepare draft notices for a personal data breach under India's DPDP Rules, 2025"),
+            el("h1", { class: "visually-hidden" }, "Breach guide"),
+            el("p", { class: "subtitle" }, "A little clarity when information may be at risk"),
           ),
         ),
-        el("span", { class: "pill pill-warn" }, "Drafts only — not legal advice"),
+        el("span", { class: "pill privacy-pill" }, icon("lock"), "Your answers stay on this device"),
       ),
     ),
     el(
@@ -145,21 +158,21 @@ export function mountApp(root: HTMLElement): void {
         el(
           "div",
           { class: "hero-copy" },
-          el("h2", { class: "hero-title" }, "Had a data breach? Get your notices ready, step by step."),
+          el("p", { class: "eyebrow" }, "ONE STEP AT A TIME"),
+          el("h2", { class: "hero-title" }, "Something happened.", el("br"), el("em", {}, "Let's work through it.")),
           el(
             "p",
             { class: "hero-lead" },
-            "Answer a few questions in plain words. This page checks your answers and writes draft notices for the people affected and for the Data Protection Board.",
+            "Lost a device? Sent information to the wrong person? Not sure what went wrong? Start here. We'll help you organise what you know and work out who can help.",
           ),
           el(
             "ol",
             { class: "steps" },
-            step("1.", "file", "Tell us what happened", "Fill in what you know so far."),
-            step("2.", "shield", "See if it's a data breach", "And how long you have left."),
-            step("3.", "send", "Copy your drafts", "Check them, then send."),
+            step("1.", "file", "Tell your story", "Everyday words are enough."),
+            step("2.", "checklist", "Get your next steps", "See who can help and what to keep."),
+            step("3.", "users", "Hand it over", "Take a clear summary to your reviewer."),
           ),
         ),
-        heroIllustration(),
       ),
       el(
         "div",
@@ -184,13 +197,14 @@ export function mountApp(root: HTMLElement): void {
         el("a", { href: "#drafts", class: "skip-link" }, "Jump to the draft notices", icon("arrowDown")),
       ),
       status,
+      workspaceRoot,
       el(
         "main",
         { class: "layout" },
         el(
           "div",
           { class: "form-column" },
-          el("div", { class: "column-head" }, el("h2", { id: "form-title" }, "1. Tell us what happened"), progressBox),
+          el("div", { class: "column-head" }, el("h2", { id: "form-title", tabindex: "-1" }, "1. Tell us what happened"), progressBox),
           formEl,
         ),
         el(
@@ -213,6 +227,70 @@ export function mountApp(root: HTMLElement): void {
       ),
     ),
   );
+
+  root.append(el("footer", { class: "app-footer" },
+    el("p", {}, "Free community draft aid, not a government service or legal advice. Use fictional information for demos."),
+    el("p", {}, "The app does not transmit your answers. A website host may receive standard page-request metadata. Save a JSON backup before closing."),
+    el("a", { href: "./guide/Breach-Guide-SOP.pdf", download: "Breach-Guide-SOP.pdf" }, "Download the visual getting-started guide (PDF)")));
+  const privacyNote = root.querySelector<HTMLElement>(".warning")!;
+  const privacyExplanation = privacyNote.querySelector("p")!;
+  privacyNote.replaceChildren(el("details", {}, el("summary", {}, "Keep personal details out of this guide"), privacyExplanation));
+  const mainContent = root.querySelector("main")!;
+  const formColumn = root.querySelector(".form-column")!;
+  mainContent.hidden = true;
+  const workspace = mountWorkspace(workspaceRoot, {
+    incident: () => state.incident,
+    response: () => state.form.response!,
+    changed: () => { state.basis = state.form.response!.basis; basisSelect.value = state.basis; recompute(); },
+    open: () => importInput.click(), save: saveFile, say,
+    isReviewer: () => reviewer,
+    hasSession: () => hasSession,
+    editAnswers: () => { reviewer = false; wizardStep = 0; renderForm(); workspace.render(); document.getElementById("wizard-heading")?.focus(); },
+    openReviewer: () => setReviewer(true),
+    start: practice => {
+      if (workspace.dirty() && !window.confirm("Start over? Unexported answers will be lost. Cancel to export first.")) return;
+      hasSession = true;
+      state.form = emptyFormState(); state.form.response = emptyResponse(); state.form.response.practice = practice;
+      state.form.response.preparationStartedAt = practiceNow(state.form.response);
+      state.form.response.history.push({ at: state.form.response.preparationStartedAt, description: practice ? "Started fictional exercise." : "Started response preparation." });
+      mainContent.hidden = false;
+      state.form.values["incidentId"] = `${practice ? "PRACTICE" : "INC"}-${Date.now()}`;
+      state.basis = ""; basisSelect.value = ""; wizardStep = 0; reviewer = false; workspace.reset(); workspace.markDirty();
+      renderForm(); workspace.renderDetails(); recompute();
+      document.getElementById("wizard-heading")?.focus();
+    },
+    focus: path => {
+      wizardStep = -1; reviewer = true; renderForm();
+      const aliases: Record<string, string> = { "classification.compromises": "classification.compromises.confidentiality" };
+      const resolvedPath = path.startsWith("noticesSent[") ? "noticesSent" : (aliases[path] ?? path);
+      const target = document.getElementById(idFor(resolvedPath)) ??
+        formEl.querySelector<HTMLElement>(path.startsWith("noticesSent") ? ".row input, .row select" : "fieldset input");
+      target?.focus(); target?.scrollIntoView({ block: "center" });
+    }
+  });
+  const modes = el("nav", { class: "mode-switcher", "aria-label": "Choose your workspace" });
+  const simpleMode = el("button", { type: "button" }, "Your next steps");
+  const reviewerMode = el("button", { type: "button" }, "For your reviewer");
+  simpleMode.addEventListener("click", () => setReviewer(false));
+  reviewerMode.addEventListener("click", () => setReviewer(true));
+  modes.append(simpleMode, reviewerMode);
+  root.querySelector(".page")!.insertBefore(modes, workspaceRoot);
+  function setReviewer(value: boolean): void {
+    reviewer = value; wizardStep = -1; renderForm(); recompute();
+    if (value && !state.incident) errorsBox.focus();
+    else document.getElementById(value ? "response-overview-title" : "beginner-overview-title")?.focus();
+  }
+  function updateMode(): void {
+    const started = hasSession;
+    root.dataset["view"] = !started ? "landing" : wizardStep >= 0 ? "guide" : reviewer ? "reviewer" : "summary";
+    mainContent.hidden = !started || wizardStep >= 0 || !reviewer;
+    commencement.hidden = !started || !reviewer || wizardStep >= 0;
+    modes.hidden = !started || wizardStep >= 0;
+    simpleMode.setAttribute("aria-pressed", String(!reviewer)); reviewerMode.setAttribute("aria-pressed", String(reviewer));
+  }
+  workspace.clockSlot.append(root.querySelector(".basis-card")!, deadlineBox, elapsedBox);
+  formEl.addEventListener("input", () => { state.form.response!.reviewedAt = null; workspace.markDirty(); workspace.render(); });
+  formEl.addEventListener("change", () => { state.form.response!.reviewedAt = null; workspace.markDirty(); workspace.render(); });
 
   // ------------------------------------------------------------ form rendering
 
@@ -252,7 +330,7 @@ export function mountApp(root: HTMLElement): void {
     const value = state.form.values[f.path] ?? "";
 
     if (f.kind === "enumSet") {
-      const fs = el("fieldset", { class: "checks", ...describedBy }, el("legend", {}, f.label));
+      const fs = el("fieldset", { id, tabindex: "-1", class: "checks", ...describedBy }, el("legend", {}, f.label));
       if (f.neededFor.length) fs.firstElementChild?.append(" ", el("span", { class: "req", "aria-hidden": "true" }, "*"));
       for (const o of f.options ?? []) {
         const cid = `${id}-${o.value}`;
@@ -342,7 +420,7 @@ export function mountApp(root: HTMLElement): void {
     const helpId = idFor(`${spec.path}-help`);
     const legend = el("legend", {}, sectionIcon(GROUP_ICONS[spec.path]), spec.legend);
     if (spec.neededFor.length) legend.append(" ", el("span", { class: "req", "aria-hidden": "true" }, "*"));
-    const fs = el("fieldset", { class: "card group", "aria-describedby": helpId }, legend);
+    const fs = el("fieldset", { id: idFor(spec.path), tabindex: "-1", class: "card group", "aria-describedby": helpId }, legend);
     fs.append(fieldHelp(helpId, spec.help, spec.neededFor, false)!);
     state.form.rows[spec.path].forEach((_, i) => {
       const remove = el("button", { type: "button", class: "ghost danger" }, `Remove ${spec.itemLabel.toLowerCase()} ${i + 1}`);
@@ -374,6 +452,83 @@ export function mountApp(root: HTMLElement): void {
   }
 
   function renderForm(): void {
+    formEl.setAttribute("aria-labelledby", wizardStep >= 0 ? "wizard-heading" : "form-title");
+    workspace.setGuided(wizardStep >= 0);
+    if (wizardStep >= 0) workspace.guidedSlot.append(formEl);
+    else formColumn.append(formEl);
+    updateMode();
+    if (wizardStep >= 0) {
+      const heading = el("h2", { id: "wizard-heading", tabindex: "-1" }, wizardTitles[wizardStep]!);
+      const explanations = ["Choose the closest description. You don't need to know the technical cause.",
+        "When did someone at your organisation first notice the problem? An approximate time you can confirm is helpful. Use Indian Standard Time (IST).",
+        "Choose the kinds of information that might be involved. Don't enter anyone's actual details.",
+        "An estimate is fine. For example, 20 customers or 5 employees. Leave this unknown if you haven't found out yet.",
+        "Has someone confirmed that the immediate problem has stopped? If you don't know, that's a useful answer too.",
+        "For example: “I told my manager” or “Our IT team is checking it.” Describe actions, not people's names."];
+      const fields = GROUPS.flatMap(g => g.fields).filter(f => wizardPaths[wizardStep]!.includes(f.path)).map(f => fieldControl({ ...f, neededFor: [], help: "" }));
+      if (wizardStep === 0) {
+        const choices = el("div", { class: "incident-choices", role: "group", "aria-label": "What did you notice?" });
+        for (const choice of INCIDENT_CHOICES) {
+          const value = choice.title === "I'm not sure what happened" ? "" : choice.title;
+          const choose = el("button", { type: "button", class: "incident-choice", "aria-pressed": String(state.form.values["description.nature"] === value) }, el("strong", {}, choice.title), el("span", {}, choice.detail));
+          choose.addEventListener("click", () => {
+            state.form.values["description.nature"] = value;
+            const input = document.getElementById(idFor("description.nature")) as HTMLTextAreaElement | null; if (input) input.value = value;
+            for (const b of choices.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b === choose));
+            recompute();
+          }); choices.append(choose);
+        }
+        const optional = el("details", { class: "optional-detail" }, el("summary", {}, "Add a little detail (optional)"), ...fields);
+        fields.splice(0, fields.length, choices, optional);
+      }
+      if (wizardStep === 2) {
+        const choices = el("fieldset", { class: "data-choices" }, el("legend", { class: "visually-hidden" }, "Information that might be involved"));
+        const existing = (state.form.values["dataCategories"] ?? "").split("\n").filter(Boolean);
+        for (const [index, label] of [...new Set([...DATA_CHOICES, ...existing])].entries()) {
+          const box = el("input", { type: "checkbox", id: `data-choice-${index}` }); box.checked = existing.includes(label);
+          box.addEventListener("change", () => {
+            const selected = new Set((state.form.values["dataCategories"] ?? "").split("\n").filter(Boolean));
+            if (box.checked) selected.add(label); else selected.delete(label);
+            state.form.values["dataCategories"] = [...selected].join("\n"); recompute();
+          }); choices.append(el("label", { for: box.id, class: "choice-row" }, box, el("span", {}, label)));
+        }
+        fields.splice(0, fields.length, choices);
+      }
+      if (wizardStep === 4) {
+        const active = el("select", { id: "wizard-containment" });
+        for (const [value, title] of [["unknown", "Not sure yet"], ["active", "Yes — still active"], ["contained", "No — contained"]]) active.append(el("option", { value: value! }, title!));
+        active.value = state.form.response!.containment;
+        active.addEventListener("change", () => { state.form.response!.containment = active.value as "unknown" | "active" | "contained"; recompute(); });
+        fields.push(el("div", { class: "field" }, el("label", { for: active.id }, "Is the incident still active?"), active));
+      }
+      const back = el("button", { type: "button", class: "secondary" }, "Back"); back.disabled = wizardStep === 0;
+      back.addEventListener("click", () => { wizardStep--; renderForm(); document.getElementById("wizard-heading")?.focus(); });
+      const next = el("button", { type: "button", class: "primary" }, wizardStep === 5 ? "See my response plan" : "Continue");
+      const full = el("button", { type: "button", class: "ghost reviewer-shortcut" }, "Open full incident form");
+      full.addEventListener("click", () => { reviewer = true; wizardStep = -1; renderForm(); workspace.renderDetails(); workspace.render(); document.getElementById("form-title")?.focus(); });
+      next.addEventListener("click", () => {
+        const validation = formToIncident(state.form);
+        if (validation.errors.length) { recompute(); say("Correct the highlighted answer before continuing."); errorsBox.scrollIntoView({ block: "center" }); return; }
+        wizardStep = wizardStep === 5 ? -1 : wizardStep + 1;
+        renderForm(); workspace.renderDetails(); recompute();
+        if (wizardStep >= 0) document.getElementById("wizard-heading")?.focus();
+        else { document.getElementById("beginner-overview-title")?.focus(); say("Your next steps are ready. You can save a summary to share with someone who can help."); }
+      });
+      const unknown = el("button", { type: "button", class: "ghost unknown-answer" }, "I don't know yet");
+      const saveProgress = el("button", { type: "button", class: "ghost save-progress" }, "Save and continue later");
+      saveProgress.addEventListener("click", () => exportButton.click());
+      unknown.addEventListener("click", () => {
+        for (const path of wizardPaths[wizardStep]!) { state.form.values[path] = ""; if (path in state.form.none) state.form.none[path] = false; }
+        if (wizardStep === 4) state.form.response!.containment = "unknown";
+        next.click();
+      });
+      const progress = el("ol", { class: "interview-progress", "aria-label": "Interview progress" });
+      for (let i = 0; i < 6; i++) progress.append(el("li", { class: i <= wizardStep ? "reached" : "", ...(i === wizardStep ? { "aria-current": "step" } : {}) }, el("span", { class: "visually-hidden" }, `Step ${i + 1}`)));
+      formEl.replaceChildren(el("p", { class: "eyebrow" }, `STEP ${wizardStep + 1} OF 6`), progress, heading, el("p", { class: "question-help" }, explanations[wizardStep]!), errorsBox, ...fields, el("div", { class: "interview-actions" }, back, next), el("div", { class: "interview-secondary" }, unknown, saveProgress),
+        el("details", { class: "reviewer-shortcut-wrap" }, el("summary", {}, "Already handling the technical or legal review?"), full));
+      return;
+    }
+    root.querySelector(".panel-column")!.insertBefore(errorsBox, checklistBox);
     const groups: HTMLElement[] = [
       el(
         "p",
@@ -498,7 +653,7 @@ export function mountApp(root: HTMLElement): void {
   }
 
   function renderTimePanels(): void {
-    const now = nowIso(Date.now());
+    const now = practiceNow(state.form.response!);
     const head = commencementHeadline(now);
     const headKey = `${head.reached}|${head.text}`;
     if (commencementSummary.dataset["key"] !== headKey) {
@@ -584,6 +739,7 @@ export function mountApp(root: HTMLElement): void {
     state.tabChanged = state.activeTab !== i;
     state.activeTab = i;
     renderDrafts();
+    workspace.render();
     document.querySelector<HTMLElement>(`[role="tab"][aria-selected="true"]`)?.focus();
   }
 
@@ -635,7 +791,14 @@ export function mountApp(root: HTMLElement): void {
 
   // ------------------------------------------------------------ recompute
 
-  function recompute(): void {
+  function recompute(preserveReview = false): void {
+    updateMode();
+    const answers = JSON.stringify([state.form.values, state.form.sets, state.form.none, state.form.rows]);
+    if (!preserveReview && previousAnswers && answers !== previousAnswers) {
+      state.form.response!.reviewedAt = null;
+      workspace.markDirty();
+    }
+    previousAnswers = answers;
     const result = formToIncident(state.form);
     state.incident = result.incident;
     if (result.errors.length) {
@@ -667,6 +830,7 @@ export function mountApp(root: HTMLElement): void {
     renderProgress();
     renderTimePanels();
     renderDrafts();
+    workspace.render();
   }
 
   function renderProgress(): void {
@@ -705,6 +869,7 @@ export function mountApp(root: HTMLElement): void {
     }
     const { filename, text } = exportIncident(state.incident);
     saveFile(filename, text, "application/json");
+    workspace.exported();
     say(`Saved ${filename} to your computer. Use "Open a saved file" to continue later.`);
   });
 
@@ -712,6 +877,8 @@ export function mountApp(root: HTMLElement): void {
     const file = importInput.files?.[0];
     importInput.value = "";
     if (!file) return;
+    if (file.size > 1_000_000) { say("This file is too large (over 1 MB)."); return; }
+    if (workspace.dirty() && !window.confirm("Replace the current incident? Export first if you want to keep unexported changes.")) return;
     file.text().then((text) => {
       const r = parseIncidentFile(text, file.size);
       if (!r.ok) {
@@ -719,14 +886,25 @@ export function mountApp(root: HTMLElement): void {
         return;
       }
       state.form = incidentToForm(r.incident);
+      hasSession = true;
+      mainContent.hidden = false;
+      state.form.response ??= emptyResponse();
+      state.basis = state.form.response.basis; basisSelect.value = state.basis; wizardStep = -1;
+      workspace.reset();
+      if (r.incident.schemaVersion === 1) workspace.markDirty();
+      workspace.renderDetails();
       renderForm();
-      recompute();
-      say(`Opened ${file.name}.`);
+      recompute(true);
+      say(`Opened ${file.name}.${r.incident.schemaVersion === 1 ? " Upgraded to version 2 in memory; your original file is unchanged. Export to save response tracking." : ""}`);
     }, () => say("Couldn't read that file."));
   });
 
   resetButton.addEventListener("click", () => {
+    if (workspace.dirty() && !window.confirm("Clear the current incident? Unexported changes will be lost.")) return;
+    hasSession = false; reviewer = false; previousAnswers = "";
     state.form = emptyFormState();
+    state.form.response = emptyResponse(); state.basis = ""; basisSelect.value = ""; wizardStep = -1;
+    workspace.reset(); workspace.renderDetails();
     renderForm();
     recompute();
     say("Started over with an empty form.");
@@ -734,10 +912,12 @@ export function mountApp(root: HTMLElement): void {
 
   basisSelect.addEventListener("change", () => {
     state.basis = basisSelect.value as Basis;
-    renderTimePanels();
+    state.form.response!.basis = state.basis; state.form.response!.reviewedAt = null;
+    workspace.markDirty(); recompute();
   });
 
   renderForm();
+  workspace.renderDetails();
   recompute();
   setInterval(renderTimePanels, 1000);
 }
