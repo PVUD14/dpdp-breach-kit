@@ -10,5 +10,7 @@ open a pull request that adds one line below, in alphabetical order by name.
 ## Contributors
 
 <!-- one line each: - Full Name (@github-handle) — what you contributed -->
+
 - KanaManishaReddy (@Manishakana) — No personal data. I submit this contribution under the Apache License 2.0 (section 5).
-- NavyaSreeMukthapuram (@NavyaSreeMukthapuram) — Contributor 2
+- NavyaSreeMukthapuram (@NavyaSreeMukthapuram) — No personal Data. I submit this contribution under the Apache License 2.0
+
